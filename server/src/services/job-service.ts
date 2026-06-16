@@ -1,6 +1,6 @@
 import type { IJobRepository, IAuditRepository, IAuthProvider } from "shared"
 import type { Job, JobStatus } from "shared"
-import { JobNotFoundError, InvalidTransitionError, OptimisticLockError, MissingReasonError, UnauthorizedError } from "shared"
+import { JobNotFoundError, InvalidTransitionError, OptimisticLockError, MissingReasonError } from "shared"
 import { VALID_TRANSITIONS } from "shared"
 
 export class JobService {
@@ -31,11 +31,6 @@ export class JobService {
 
     if (newStatus === "CANCELLED" && !reason) {
       throw new MissingReasonError("cancelling a job")
-    }
-
-    if (newStatus === "COMPLETED") {
-      const user = await this.authProvider.getCurrentUser(userId)
-      if (!user) throw new UnauthorizedError()
     }
 
     const updated = await this.jobRepo.updateStatus(jobId, newStatus, job.version)
