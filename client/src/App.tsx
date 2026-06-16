@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { RouterProvider, createRouter, createRoute, createRootRoute } from "@tanstack/react-router"
 import { LoginPage } from "./pages/login"
 import { JobsPage } from "./pages/jobs"
+import { JobDetailPage } from "./pages/job-detail"
 
 const queryClient = new QueryClient()
 
@@ -19,7 +20,13 @@ const jobsRoute = createRoute({
   component: JobsPage,
 })
 
-const routeTree = rootRoute.addChildren([loginRoute, jobsRoute])
+const jobDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/jobs/$id",
+  component: JobDetailPage,
+})
+
+const routeTree = rootRoute.addChildren([loginRoute, jobsRoute, jobDetailRoute])
 const router = createRouter({ routeTree })
 
 declare module "@tanstack/react-router" {
