@@ -15,7 +15,4 @@ export const db = drizzle(client, { schema })
 
 export type DrizzleDB = typeof db
 
-// Base type compatible with both postgres-js and PGLite for test use
-export type BasePgDB = import('drizzle-orm/pg-core').PgDatabase
-
 export { schema }

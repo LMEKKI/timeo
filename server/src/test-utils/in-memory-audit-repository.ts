@@ -18,10 +18,9 @@ export class InMemoryAuditRepository implements IAuditRepository {
     return this.logs.filter(l => l.jobId === jobId)
   }
 
-  async findRecentByUser(userId: string, limit: number): Promise<JobAuditLog[]> {
-    return this.logs
-      .filter(l => l.userProfileId === userId)
-      .slice(-limit)
-      .reverse()
+  async findByUser(userId: string, limit?: number): Promise<JobAuditLog[]> {
+    const filtered = this.logs.filter(l => l.userProfileId === userId)
+    const limited = limit ? filtered.slice(-limit).reverse() : filtered.reverse()
+    return limited
   }
 }
