@@ -1,7 +1,16 @@
 import { relations } from 'drizzle-orm'
 
 import { company, branch } from './company'
-import { userProfile, permission, userSetting } from './user'
+import { userProfile, permission, userSetting, userRoleEnum } from './user'
+import {
+  user,
+  session,
+  account,
+  verification,
+  userRelations,
+  sessionRelations,
+  accountRelations,
+} from './better-auth'
 import { customer } from './customer'
 import { job, jobAssignment, consumedMaterial } from './job'
 import { jobType, formTemplate, workflowConfig } from './form'
@@ -151,6 +160,7 @@ export {
   userProfile,
   permission,
   userSetting,
+  userRoleEnum,
   customer,
   job,
   jobAssignment,
@@ -162,4 +172,8 @@ export {
   jobBillingSnapshot,
   companyConfig,
   systemConfig,
+  user,
+  session,
+  account,
+  verification,
 }

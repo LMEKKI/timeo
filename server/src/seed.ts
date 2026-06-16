@@ -2,6 +2,7 @@ import { drizzle } from "drizzle-orm/postgres-js"
 import postgres from "postgres"
 import { betterAuth } from "better-auth"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
+import * as schema from "./db/schema"
 import { company, branch, userProfile, permission, jobType, formTemplate, workflowConfig } from "./db/schema"
 import { job, jobAssignment } from "./db/schema/job"
 import { customer } from "./db/schema/customer"
@@ -13,7 +14,7 @@ async function seed() {
     process.exit(1)
   }
   const pgClient = postgres(connectionString)
-  const db = drizzle(pgClient, { schema: { company, branch, userProfile, permission, customer, jobType, formTemplate, workflowConfig, job } })
+  const db = drizzle(pgClient, { schema })
 
   const auth = betterAuth({
     database: drizzleAdapter(db as any, { provider: "pg" }),
@@ -46,8 +47,8 @@ async function seed() {
   // 3. Auth users + profiles
   const userData = [
     { email: "admin@timeo.app", password: "admin123", name: "Admin", role: "GLOBAL_ADMIN" as const },
-    { email: "tech1@timeo.app", password: "tech123", name: "Jean Tech", role: "FIELD_TECHNICIAN" as const },
-    { email: "tech2@timeo.app", password: "tech123", name: "Marie Tech", role: "FIELD_TECHNICIAN" as const },
+    { email: "tech1@timeo.app", password: "tech12345", name: "Jean Tech", role: "FIELD_TECHNICIAN" as const },
+    { email: "tech2@timeo.app", password: "tech12345", name: "Marie Tech", role: "FIELD_TECHNICIAN" as const },
   ]
 
   for (const u of userData) {
