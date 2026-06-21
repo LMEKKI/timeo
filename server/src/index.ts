@@ -1,23 +1,19 @@
-import { serve } from "bun"
-import app from "./routes"
+import { Hono } from "hono"
+import { cors } from "hono/cors"
 
-/**
- * Timeo API — Hono server entry point.
- *
- * All routes are composed in `routes/index.ts` including Better Auth.
- * This file only starts the server and exports the AppType for RPC clients.
- *
- * Start: `bun run dev:server`
- */
+const app = new Hono()
 
-const port = Number(process.env.PORT) || 3000
+app.use("*", cors({ origin: process.env.CORS_ORIGIN || "*" }))
 
-console.log(`🚀 Timeo API running on http://localhost:${port}`)
-console.log(`📋 Health check: http://localhost:${port}/api/health`)
+app.onError((err, c) => {
+  console.error(err)
+  return c.json({
+    error: { code: "INTERNAL_ERROR", message: "Erreur serveur" },
+  }, 500)
+})
 
-serve({
-  fetch: app.fetch,
-  port,
+app.get("/api/health", (c) => {
+  return c.json({ data: { status: "ok", message: "Timeo API is running" } })
 })
 
 export type AppType = typeof app

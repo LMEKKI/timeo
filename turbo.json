@@ -14,7 +14,6 @@
         "vite.config.ts",
         "package.json",
         "bun.lock",
-        "eslint.config.js",
         "index.html"
       ],
       "outputs": ["dist/**", "build/**", ".turbo/**"],
