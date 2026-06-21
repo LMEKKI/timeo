@@ -165,7 +165,44 @@ git merge hotfix/description-du-bug
 git push origin dev
 ```
 
-## 9. Règles d'or ( afficher sur ton écran )
+## 9. CI/CD — Comment ça marche
+
+### Sur chaque PR (vers `dev` ou `main`)
+
+1. **CodeRabbit** review automatiquement ton code (gratuit, config dans `.coderabbit.yaml`)
+   - Vérifie la checklist Timeo (pas de `any`, fichiers < 250 lignes, etc.)
+   - Poste un commentaire avec les issues trouvées
+   - Tu peux répondre au bot pour affiner la review
+
+2. **CI GitHub Actions** (`.github/workflows/ci.yml`) tourne :
+   - `bun run lint` (Biome)
+   - `bun run type-check` (tsc --noEmit)
+   - `bun run build` (Turborepo build tous les packages)
+   - Cache Turbo pour accélérer les builds
+
+3. **Branch protection** :
+   - `main` et `dev` exigent que le job `CI / quality` passe
+   - 0 approval requis (solo dev)
+   - Pas de force push, pas de deletion
+
+### Deploy
+
+**Pas de workflow deploy en v1.** Vercel déploie automatiquement :
+- `main` push → production (`timeo.vercel.app`)
+- `dev` push → preview (`timeo-dev.vercel.app`)
+- `feat/*` push → preview (`timeo-feat-xxx.vercel.app`)
+
+Tu connectes le repo à Vercel une fois (https://vercel.com/new), et c'est tout.
+Le fichier `vercel.json` sera ajouté dans la PR #7 (Realtime + Polish).
+
+### Si le CI échoue
+
+1. Lis le message d'erreur dans l'onglet "Actions" sur GitHub
+2. Corrige localement : `bun run lint && bun run type-check && bun run build`
+3. Commit et pousse la correction
+4. Le CI relance automatiquement
+
+## 10. Règles d'or ( afficher sur ton écran )
 
 1. **KISS** — Si c'est compliqué, c'est faux
 2. **YAGNI** — Si tu n'en as pas besoin maintenant, ne le code pas
@@ -176,7 +213,7 @@ git push origin dev
 7. **Squash merge** — Historique propre, 1 commit par PR
 8. **Si tu bloques > 30 min** — Arrête, relis la spec, ou demande de l'aide
 
-## 10. Ressources
+## 11. Ressources
 
 - [Conventional Commits](https://www.conventionalcommits.org/)
 - `docs/CONVENTIONS.md` — Règles de code détaillées
