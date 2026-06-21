@@ -1,0 +1,6 @@
+branch=$(git symbolic-ref HEAD 2>/dev/null | sed 's/refs\/heads\///')
+
+if [ "$branch" = "main" ] || [ "$branch" = "dev" ]; then
+  echo "ERROR: Push direct vers $branch interdit. Utilise une pull request."
+  exit 1
+fi

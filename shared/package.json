@@ -15,10 +15,10 @@
 		"type-check": "tsc --noEmit",
 		"lint": "biome lint src/"
 	},
-  "dependencies": {
-    "zod": "^4.4.3"
-  },
-  "devDependencies": {
-    "typescript": "^5.9.3"
-  }
+	"dependencies": {
+		"zod": "^4.4.3"
+	},
+	"devDependencies": {
+		"typescript": "^5.9.3"
+	}
 }
