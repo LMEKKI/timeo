@@ -43,3 +43,6 @@ bun.lockb
 
 # Temp agent context files
 .tmp/
+
+# Superpowers brainstorm state
+.superpowers/
