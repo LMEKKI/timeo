@@ -1,42 +1,45 @@
-import { z } from 'zod'
+import { z } from "zod"
 
-export const UserRoleEnum = z.enum(['GLOBAL_ADMIN', 'BRANCH_MANAGER', 'FIELD_TECHNICIAN'])
+export const userRoleEnum = z.enum(["chef", "tech"])
+export type UserRole = z.infer<typeof userRoleEnum>
 
-export const UserProfileSchema = z.object({
-  id: z.string(),
-  authProviderId: z.string(),
-  branchId: z.string(),
-  firstName: z.string().min(1).max(100),
-  lastName: z.string().min(1).max(100),
-  email: z.string().email(),
-  isDeleted: z.boolean().default(false),
+export const disponibiliteEnum = z.enum(["disponible", "indisponible", "en_intervention"])
+export type Disponibilite = z.infer<typeof disponibiliteEnum>
+
+// ─── Create User (chef creates a tech account) ────────────────────────────────
+
+export const createUserSchema = z.object({
+  name: z.string().min(2, "Nom trop court").max(100),
+  username: z.string().min(3, "Username trop court (min 3)").max(50),
+  password: z.string().min(6, "Mot de passe trop court (min 6)").max(100),
+  role: userRoleEnum.default("tech"),
 })
-export type UserProfileDTO = z.infer<typeof UserProfileSchema>
 
-export const CreateUserSchema = z.object({
-  email: z.string().email(),
-  password: z.string()
-    .min(8, 'Password must be at least 8 characters')
-    .max(128, 'Password must be at most 128 characters')
-    .regex(/[A-Z]/, 'Password must contain an uppercase letter')
-    .regex(/[a-z]/, 'Password must contain a lowercase letter')
-    .regex(/[0-9]/, 'Password must contain a digit'),
-  firstName: z.string().min(1).max(100),
-  lastName: z.string().min(1).max(100),
-  branchId: z.string(),
-  role: UserRoleEnum.default('FIELD_TECHNICIAN'),
-})
-export type CreateUserDTO = z.infer<typeof CreateUserSchema>
+export type CreateUser = z.infer<typeof createUserSchema>
 
-export const SignInSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(1),
-})
-export type SignInDTO = z.infer<typeof SignInSchema>
+// ─── Update User ──────────────────────────────────────────────────────────────
 
-export const PermissionSchema = z.object({
-  id: z.string(),
-  userProfileId: z.string(),
-  role: UserRoleEnum,
+export const updateUserSchema = z.object({
+  name: z.string().min(2).max(100).optional(),
+  disponibilite: disponibiliteEnum.optional(),
 })
-export type PermissionDTO = z.infer<typeof PermissionSchema>
+
+export type UpdateUser = z.infer<typeof updateUserSchema>
+
+// ─── Availability Update ──────────────────────────────────────────────────────
+
+export const updateDisponibiliteSchema = z.object({
+  disponibilite: disponibiliteEnum,
+})
+
+export type UpdateDisponibilite = z.infer<typeof updateDisponibiliteSchema>
+
+// ─── Filters ──────────────────────────────────────────────────────────────────
+
+export const userFiltersSchema = z.object({
+  role: userRoleEnum.optional(),
+  disponibilite: disponibiliteEnum.optional(),
+  search: z.string().max(200).optional(),
+})
+
+export type UserFilters = z.infer<typeof userFiltersSchema>

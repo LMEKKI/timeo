@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: timeo
+          POSTGRES_PASSWORD: timeo123
+          POSTGRES_DB: timeo
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Type Check
+        run: bun run type-check
+        env:
+          DATABASE_URL: postgresql://timeo:timeo123@localhost:5432/timeo
+
+      - name: Build
+        run: bun run build
+        env:
+          DATABASE_URL: postgresql://timeo:timeo123@localhost:5432/timeo

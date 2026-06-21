@@ -1,0 +1,5 @@
+# CODEOWNERS — Timeo
+# Solo dev : toutes les routes pointent vers le propriétaire du repo
+# Permet l'auto-review et les notifications GitHub
+
+* @LMEKKI

@@ -1,6 +1,5 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "ui": "tui",
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
@@ -43,13 +42,11 @@
         "src/**/*.tsx",
         "src/**/*.js",
         "src/**/*.jsx",
-        "eslint.config.js",
-        ".eslintrc*",
         "package.json",
         "tsconfig.json",
         "tsconfig.*.json"
       ],
-      "outputs": [".eslintcache"],
+      "outputs": [],
       "env": ["NODE_ENV"]
     },
     "type-check": {

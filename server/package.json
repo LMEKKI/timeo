@@ -16,13 +16,18 @@
   "scripts": {
     "build": "tsc",
     "dev": "bun --watch run src/index.ts & tsc --watch",
-    "test": "bun test"
+    "test": "bun test",
+    "type-check": "tsc --noEmit",
+    "lint": "biome lint src/"
   },
   "dependencies": {
     "@better-auth/drizzle-adapter": "^1.6.19",
     "hono": "^4.10.8",
+    "better-auth": "^1.6.19",
+    "drizzle-orm": "^0.45.2",
     "postgres": "^3.4.9",
-    "shared": "workspace:*"
+    "shared": "workspace:*",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/bun": "latest",
