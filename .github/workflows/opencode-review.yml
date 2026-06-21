@@ -1,0 +1,74 @@
+name: opencode-review
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+
+jobs:
+  review:
+    # Pour les reviews automatiques sur PR
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+      issues: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: anomalyco/opencode/github@latest
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          model: deepseek/deepseek-chat
+          use_github_token: true
+          prompt: |
+            Review ce pull request pour le projet Timeo.
+            Vérifie :
+            - Pas de `any` — tout est typé
+            - Pas de console.log oublié
+            - Pas de code commenté
+            - Pas de fichier > 250 lignes
+            - Pas de fonction > 30 lignes
+            - Nommage clair (pas d'abréviations)
+            - Early return (pas de nesting profond)
+            - Named exports uniquement (pas de default export)
+            - Erreurs au format canonique `{ error: { code, message, field? } }`
+            - Colonnes BDD en anglais
+            - UI en français
+            - Zod = source de vérité (pas de types manuels)
+            - Pas de patterns complexes (Repository, Factory, Strategy)
+            
+            Sois pédagogique : explique POURQUOI quelque chose est mal.
+            Le développeur est junior, sois bienveillant mais direct.
+
+  # Pour les commandes interactives /opencode ou /oc
+  interactive:
+    if: |
+      github.event_name == 'issue_comment' &&
+      (contains(github.event.comment.body, '/oc') ||
+       contains(github.event.comment.body, '/opencode'))
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+      pull-requests: write
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: anomalyco/opencode/github@latest
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          model: deepseek/deepseek-chat
+          use_github_token: true

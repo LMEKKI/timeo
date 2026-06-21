@@ -1,0 +1,67 @@
+# CodeRabbit — Configuration Timeo
+# Docs: https://docs.coderabbit.ai/configuration-guide
+
+# Reviews automatiques sur chaque PR
+reviews:
+  # Auto-review à l'ouverture de la PR
+  auto_review:
+    enabled: true
+    drafts: false
+
+  # Checkliste de review spécifique au projet
+  checklist:
+    - "Pas de `any` — tout est typé"
+    - "Pas de console.log oublié"
+    - "Pas de code commenté"
+    - "Pas de TODO dans le code (créer une issue)"
+    - "Pas de fichier > 250 lignes"
+    - "Pas de fonction > 30 lignes"
+    - "Nommage clair (pas d'abréviations)"
+    - "Early return (pas de nesting profond)"
+    - "Pas de classe / interface avec 1 impl"
+    - "Named exports uniquement (pas de default export)"
+    - "Erreurs au format canonique `{ error: { code, message, field? } }`"
+    - "Colonnes BDD en anglais"
+    - "UI en français"
+    - "Zod = source de vérité (pas de types manuels)"
+
+  # Path-specific instructions
+  path_instructions:
+    - path: "server/src/routes/**"
+      instructions: |
+        - Valider avec Zod sur chaque endpoint
+        - Handler = orchestration seulement (valider → logique → répondre)
+        - Soft delete : filtrer isNull(deletedAt)
+        - Format d'erreur canonique obligatoire
+    - path: "server/src/db/schema/**"
+      instructions: |
+        - Colonnes en anglais (status, priority, startTime, etc.)
+        - FK avec arrow functions: () => table.column
+        - Ne pas modifier better-auth.ts
+    - path: "client/src/components/**"
+      instructions: |
+        - Composant = fonction, pas de classes
+        - Pas de React.FC<Props>
+        - Pas de useMemo/useCallback par défaut
+        - Props typées, jamais any
+    - path: "shared/src/schemas/**"
+      instructions: |
+        - Zod = source unique de vérité
+        - Type inféré: z.infer<typeof schema>
+        - Pas de types manuels dupliquant Zod
+
+# Chat avec le bot
+chat:
+  auto_reply:
+    enabled: true
+
+# Langue des reviews
+language: fr
+
+# Tone
+tone_instructions: |
+  Tu reviews le code d'un développeur junior en solo.
+  Sois pédagogique : explique POURQUOI quelque chose est mal,
+  pas juste ce qui est mal. Donne des exemples de correction.
+  Encourage les bonnes pratiques quand tu les vois.
+  Sois bienveillant mais direct.
