@@ -7,24 +7,6 @@ reviews:
   auto_review:
     enabled: true
     drafts: false
-
-  # Checkliste de review spécifique au projet
-  checklist:
-    - "Pas de `any` — tout est typé"
-    - "Pas de console.log oublié"
-    - "Pas de code commenté"
-    - "Pas de TODO dans le code (créer une issue)"
-    - "Pas de fichier > 250 lignes"
-    - "Pas de fonction > 30 lignes"
-    - "Nommage clair (pas d'abréviations)"
-    - "Early return (pas de nesting profond)"
-    - "Pas de classe / interface avec 1 impl"
-    - "Named exports uniquement (pas de default export)"
-    - "Erreurs au format canonique `{ error: { code, message, field? } }`"
-    - "Colonnes BDD en anglais"
-    - "UI en français"
-    - "Zod = source de vérité (pas de types manuels)"
-
   # Path-specific instructions
   path_instructions:
     - path: "server/src/routes/**"
@@ -52,16 +34,11 @@ reviews:
 
 # Chat avec le bot
 chat:
-  auto_reply:
-    enabled: true
+  auto_reply: true
 
 # Langue des reviews
 language: fr
 
 # Tone
 tone_instructions: |
-  Tu reviews le code d'un développeur junior en solo.
-  Sois pédagogique : explique POURQUOI quelque chose est mal,
-  pas juste ce qui est mal. Donne des exemples de correction.
-  Encourage les bonnes pratiques quand tu les vois.
-  Sois bienveillant mais direct.
+  Pédagogique et bienveillant (junior solo). Vérifie : pas de any, console.log, TODO, fichier >250 lignes, fonction >30 lignes, classe/interface. Early return, named exports, erreurs format canonique, colonnes anglais, UI français, Zod.
