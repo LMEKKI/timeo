@@ -21,7 +21,17 @@ const tech = ac.newRole({
 	intervention: ["read", "update"],
 });
 
+const vercelPreviewUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined;
+
 export const auth = betterAuth({
+	baseURL: {
+		allowedHosts: ["*.vercel.app", "localhost:3000", "localhost:5173"],
+		fallback: process.env.BETTER_AUTH_URL,
+		protocol: process.env.NODE_ENV === "production" ? "https" : "http",
+	},
+	advanced: {
+		trustedProxyHeaders: true,
+	},
 	database: drizzleAdapter(db, { provider: "pg", schema }),
 	emailAndPassword: {
 		enabled: true,
@@ -48,7 +58,9 @@ export const auth = betterAuth({
 		expiresIn: 60 * 60 * 24 * 7,
 		updateAge: 60 * 60 * 24,
 	},
-	trustedOrigins: process.env.CORS_ORIGIN ? [process.env.CORS_ORIGIN] : [],
+	trustedOrigins: [process.env.CORS_ORIGIN, vercelPreviewUrl].filter((origin): origin is string =>
+		Boolean(origin),
+	),
 	plugins: [
 		admin({ ac, roles: { chef, tech }, defaultRole: "tech", adminRoles: ["chef"] }),
 		username(),
