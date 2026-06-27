@@ -12,6 +12,8 @@
 |------|--------|---------|
 | Code source (variables, fonctions, fichiers) | 🇬🇧 Anglais | `getInterventionById` |
 | Tables, colonnes, enums BDD | 🇬🇧 Anglais | `interventions`, `status`, `priority` |
+| Enums BDD / tokens | 🇬🇧 Anglais | `status: 'planned'` |
+| Labels UI | 🇫🇷 Français | "Planifié" |
 | Commentaires dans le code | 🇬🇧 Anglais | `// Only assigned tech can transition` |
 | Messages utilisateur (UI) | 🇫🇷 Français | `"Intervention créée avec succès"` |
 | Commits, PRs, documentation | 🇫🇷 Français | `feat: création du formulaire client` |
@@ -407,6 +409,8 @@ export const createInterventionSchema = z.object({
 export type CreateIntervention = z.infer<typeof createInterventionSchema>
 ```
 
+**Enums :** utiliser `pgEnum()` côté Drizzle pour avoir une vraie contrainte BDD. Type inféré via `z.enum()` côté Zod (mêmes valeurs).
+
 ---
 
 ## 10. Commentaires
@@ -677,6 +681,29 @@ const authClient = createAuthClient({
 })
 ```
 
+**Plugin admin :**
+
+```ts
+import { admin, username, emailAndPassword } from "better-auth/plugins"
+import { createAccessControl } from "better-auth/plugins/access"
+
+const statement = {
+  user: ["create", "list", "set-role", "set-password", "ban"],
+  intervention: ["create", "update", "delete", "read"],
+} as const
+const ac = createAccessControl(statement)
+const chef = ac.newRole({ user: ["create", "list", "set-password"], intervention: ["create", "update", "delete", "read"] })
+const tech = ac.newRole({ intervention: ["read", "update"] })
+
+export const auth = betterAuth({
+  // ...database, emailAndPassword, etc.
+  plugins: [
+    admin({ ac, roles: { chef, tech }, defaultRole: "tech", adminRoles: ["chef"] }),
+    username(),
+  ],
+})
+```
+
 ---
 
 ## 16. TDD — Notre approche pour v1
@@ -725,7 +752,7 @@ test('tech can start and complete an intervention', async ({ page }) => {
 **KISS :**
 - Un seul format d'erreur API (`{ error: { code, message, field? } }`)
 - Un seul plan de PR (PR-PLAN.md)
-- SSE pour Realtime, pas Supabase Realtime
+- **Polling** (TanStack Query `refetchInterval`) pour le quasi-realtime, pas de SSE
 - Timeline simple, pas de Gantt interactif
 
 **YAGNI :**
@@ -743,3 +770,5 @@ test('tech can start and complete an intervention', async ({ page }) => {
 - [Violet Issue](https://designmd.ai/chef/violet-issue) — design system
 - [SPEC-V1.md](./SPEC-V1.md) — spécification fonctionnelle
 - [DESIGN.md](./DESIGN.md) — design system complet
+- **Better Auth admin plugin** : https://better-auth.com/docs/plugins/admin
+- **IA Prompt Templates** : [`docs/IA-PROMPT-TEMPLATES.md`](./IA-PROMPT-TEMPLATES.md) — bibliothèque de 8 templates pour déléguer à l'IA

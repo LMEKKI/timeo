@@ -8,8 +8,7 @@
 
 		// Output configuration
 		"declaration": true,
-		"outDir": "dist",
-		"rootDir": "src",
+		"outDir": "./dist",
 		"noEmit": false,
 
 		// Type checking
