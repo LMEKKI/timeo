@@ -6,6 +6,12 @@ import { env } from "./lib/env"
 import { handleError } from "./lib/errors"
 import type { AppVariables } from "./lib/types"
 import { authRoute } from "./routes/auth"
+import { clientsRoute } from "./routes/clients"
+import { dashboardRoute } from "./routes/dashboard"
+import { interventionAssignmentsRoute } from "./routes/intervention-assignments"
+import { interventionNotesRoute } from "./routes/intervention-notes"
+import { interventionsRoute } from "./routes/interventions"
+import { proximityRoute } from "./routes/proximity"
 import { usersRoute } from "./routes/users"
 
 const app = new Hono<{ Variables: AppVariables }>()
@@ -37,6 +43,12 @@ app.get("/api/health", (c) => c.json({ data: { status: "ok" } }))
 
 app.route("/api/auth-custom", authRoute)
 app.route("/api/users", usersRoute)
+app.route("/api/interventions", interventionsRoute)
+app.route("/api/interventions", interventionAssignmentsRoute)
+app.route("/api/interventions", interventionNotesRoute)
+app.route("/api/clients", clientsRoute)
+app.route("/api/dashboard", dashboardRoute)
+app.route("/api/proximity", proximityRoute)
 
 app.onError((err, c) => {
 	const { status, body } = handleError(err)
