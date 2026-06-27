@@ -17,10 +17,12 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthedTechRouteImport } from './routes/_authed.tech'
 import { Route as AuthedProfilRouteImport } from './routes/_authed.profil'
 import { Route as AuthedChefRouteImport } from './routes/_authed.chef'
+import { Route as AuthedTechMissionsRouteImport } from './routes/_authed.tech.missions'
 import { Route as AuthedChefTechsRouteImport } from './routes/_authed.chef.techs'
 import { Route as AuthedChefInterventionsRouteImport } from './routes/_authed.chef.interventions'
 import { Route as AuthedChefDashboardRouteImport } from './routes/_authed.chef.dashboard'
 import { Route as AuthedChefClientsRouteImport } from './routes/_authed.chef.clients'
+import { Route as AuthedTechMissionDetailIdRouteImport } from './routes/_authed.tech.mission-detail.$id'
 import { Route as AuthedChefInterventionDetailIdRouteImport } from './routes/_authed.chef.intervention-detail.$id'
 import { Route as AuthedChefClientDetailIdRouteImport } from './routes/_authed.chef.client-detail.$id'
 
@@ -63,6 +65,11 @@ const AuthedChefRoute = AuthedChefRouteImport.update({
   path: '/chef',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedTechMissionsRoute = AuthedTechMissionsRouteImport.update({
+  id: '/missions',
+  path: '/missions',
+  getParentRoute: () => AuthedTechRoute,
+} as any)
 const AuthedChefTechsRoute = AuthedChefTechsRouteImport.update({
   id: '/techs',
   path: '/techs',
@@ -83,6 +90,12 @@ const AuthedChefClientsRoute = AuthedChefClientsRouteImport.update({
   path: '/clients',
   getParentRoute: () => AuthedChefRoute,
 } as any)
+const AuthedTechMissionDetailIdRoute =
+  AuthedTechMissionDetailIdRouteImport.update({
+    id: '/mission-detail/$id',
+    path: '/mission-detail/$id',
+    getParentRoute: () => AuthedTechRoute,
+  } as any)
 const AuthedChefInterventionDetailIdRoute =
   AuthedChefInterventionDetailIdRouteImport.update({
     id: '/intervention-detail/$id',
@@ -103,13 +116,15 @@ export interface FileRoutesByFullPath {
   '/non-autorise': typeof NonAutoriseRoute
   '/chef': typeof AuthedChefRouteWithChildren
   '/profil': typeof AuthedProfilRoute
-  '/tech': typeof AuthedTechRoute
+  '/tech': typeof AuthedTechRouteWithChildren
   '/chef/clients': typeof AuthedChefClientsRoute
   '/chef/dashboard': typeof AuthedChefDashboardRoute
   '/chef/interventions': typeof AuthedChefInterventionsRoute
   '/chef/techs': typeof AuthedChefTechsRoute
+  '/tech/missions': typeof AuthedTechMissionsRoute
   '/chef/client-detail/$id': typeof AuthedChefClientDetailIdRoute
   '/chef/intervention-detail/$id': typeof AuthedChefInterventionDetailIdRoute
+  '/tech/mission-detail/$id': typeof AuthedTechMissionDetailIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -118,13 +133,15 @@ export interface FileRoutesByTo {
   '/non-autorise': typeof NonAutoriseRoute
   '/chef': typeof AuthedChefRouteWithChildren
   '/profil': typeof AuthedProfilRoute
-  '/tech': typeof AuthedTechRoute
+  '/tech': typeof AuthedTechRouteWithChildren
   '/chef/clients': typeof AuthedChefClientsRoute
   '/chef/dashboard': typeof AuthedChefDashboardRoute
   '/chef/interventions': typeof AuthedChefInterventionsRoute
   '/chef/techs': typeof AuthedChefTechsRoute
+  '/tech/missions': typeof AuthedTechMissionsRoute
   '/chef/client-detail/$id': typeof AuthedChefClientDetailIdRoute
   '/chef/intervention-detail/$id': typeof AuthedChefInterventionDetailIdRoute
+  '/tech/mission-detail/$id': typeof AuthedTechMissionDetailIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -135,13 +152,15 @@ export interface FileRoutesById {
   '/non-autorise': typeof NonAutoriseRoute
   '/_authed/chef': typeof AuthedChefRouteWithChildren
   '/_authed/profil': typeof AuthedProfilRoute
-  '/_authed/tech': typeof AuthedTechRoute
+  '/_authed/tech': typeof AuthedTechRouteWithChildren
   '/_authed/chef/clients': typeof AuthedChefClientsRoute
   '/_authed/chef/dashboard': typeof AuthedChefDashboardRoute
   '/_authed/chef/interventions': typeof AuthedChefInterventionsRoute
   '/_authed/chef/techs': typeof AuthedChefTechsRoute
+  '/_authed/tech/missions': typeof AuthedTechMissionsRoute
   '/_authed/chef/client-detail/$id': typeof AuthedChefClientDetailIdRoute
   '/_authed/chef/intervention-detail/$id': typeof AuthedChefInterventionDetailIdRoute
+  '/_authed/tech/mission-detail/$id': typeof AuthedTechMissionDetailIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -157,8 +176,10 @@ export interface FileRouteTypes {
     | '/chef/dashboard'
     | '/chef/interventions'
     | '/chef/techs'
+    | '/tech/missions'
     | '/chef/client-detail/$id'
     | '/chef/intervention-detail/$id'
+    | '/tech/mission-detail/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -172,8 +193,10 @@ export interface FileRouteTypes {
     | '/chef/dashboard'
     | '/chef/interventions'
     | '/chef/techs'
+    | '/tech/missions'
     | '/chef/client-detail/$id'
     | '/chef/intervention-detail/$id'
+    | '/tech/mission-detail/$id'
   id:
     | '__root__'
     | '/'
@@ -188,8 +211,10 @@ export interface FileRouteTypes {
     | '/_authed/chef/dashboard'
     | '/_authed/chef/interventions'
     | '/_authed/chef/techs'
+    | '/_authed/tech/missions'
     | '/_authed/chef/client-detail/$id'
     | '/_authed/chef/intervention-detail/$id'
+    | '/_authed/tech/mission-detail/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -258,6 +283,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedChefRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/tech/missions': {
+      id: '/_authed/tech/missions'
+      path: '/missions'
+      fullPath: '/tech/missions'
+      preLoaderRoute: typeof AuthedTechMissionsRouteImport
+      parentRoute: typeof AuthedTechRoute
+    }
     '/_authed/chef/techs': {
       id: '/_authed/chef/techs'
       path: '/techs'
@@ -285,6 +317,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/chef/clients'
       preLoaderRoute: typeof AuthedChefClientsRouteImport
       parentRoute: typeof AuthedChefRoute
+    }
+    '/_authed/tech/mission-detail/$id': {
+      id: '/_authed/tech/mission-detail/$id'
+      path: '/mission-detail/$id'
+      fullPath: '/tech/mission-detail/$id'
+      preLoaderRoute: typeof AuthedTechMissionDetailIdRouteImport
+      parentRoute: typeof AuthedTechRoute
     }
     '/_authed/chef/intervention-detail/$id': {
       id: '/_authed/chef/intervention-detail/$id'
@@ -325,16 +364,30 @@ const AuthedChefRouteWithChildren = AuthedChefRoute._addFileChildren(
   AuthedChefRouteChildren,
 )
 
+interface AuthedTechRouteChildren {
+  AuthedTechMissionsRoute: typeof AuthedTechMissionsRoute
+  AuthedTechMissionDetailIdRoute: typeof AuthedTechMissionDetailIdRoute
+}
+
+const AuthedTechRouteChildren: AuthedTechRouteChildren = {
+  AuthedTechMissionsRoute: AuthedTechMissionsRoute,
+  AuthedTechMissionDetailIdRoute: AuthedTechMissionDetailIdRoute,
+}
+
+const AuthedTechRouteWithChildren = AuthedTechRoute._addFileChildren(
+  AuthedTechRouteChildren,
+)
+
 interface AuthedRouteChildren {
   AuthedChefRoute: typeof AuthedChefRouteWithChildren
   AuthedProfilRoute: typeof AuthedProfilRoute
-  AuthedTechRoute: typeof AuthedTechRoute
+  AuthedTechRoute: typeof AuthedTechRouteWithChildren
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedChefRoute: AuthedChefRouteWithChildren,
   AuthedProfilRoute: AuthedProfilRoute,
-  AuthedTechRoute: AuthedTechRoute,
+  AuthedTechRoute: AuthedTechRouteWithChildren,
 }
 
 const AuthedRouteWithChildren =

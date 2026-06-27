@@ -11,7 +11,7 @@ export const authClient = createAuthClient({
 })
 
 type SessionUser = NonNullable<typeof authClient.$Infer.Session.user>
-type User = (SessionUser & UserWithRole & { mustChangePassword?: boolean }) | null
+type User = (SessionUser & UserWithRole & { mustChangePassword?: boolean; availabilityStatus?: string }) | null
 
 export type AuthContext = {
 	user: User
