@@ -38,7 +38,7 @@ export function useInterventions(filters: { date?: string; status?: string } = {
 			if (!res.ok) throw new Error("Failed to fetch interventions")
 			return res.json().then((d) => d.data as InterventionListItem[])
 		},
-		refetchInterval: 10_000,
+		refetchInterval: 2_000,
 	})
 }
 
