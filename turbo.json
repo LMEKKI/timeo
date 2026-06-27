@@ -16,7 +16,7 @@
 				"bun.lock",
 				"index.html"
 			],
-			"outputs": ["dist/**", "build/**"],
+			"outputs": ["dist/**", "build/**", ".turbo/**"],
 			"env": ["NODE_ENV", "VITE_*"]
 		},
 		"dev": {

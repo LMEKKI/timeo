@@ -18,10 +18,14 @@
 		"dev": "bun --watch run src/index.ts & tsc --watch",
 		"test": "bun test",
 		"type-check": "tsc --noEmit",
+<<<<<<< HEAD
 		"lint": "biome lint src/",
 		"db:generate": "drizzle-kit generate",
 		"db:push": "drizzle-kit push",
 		"db:seed": "bun run src/db/seed.ts"
+=======
+		"lint": "biome lint src/"
+>>>>>>> origin/main
 	},
 	"dependencies": {
 		"@better-auth/drizzle-adapter": "^1.6.19",

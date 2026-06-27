@@ -8,9 +8,13 @@
 	"compilerOptions": {
 		"baseUrl": ".",
 		"paths": {
+<<<<<<< HEAD
 			"@/*": ["./src/*"],
 			"@shared/*": ["../shared/src/*"],
 			"@server/*": ["../server/src/*"]
+=======
+			"@/*": ["./src/*"]
+>>>>>>> origin/main
 		}
 	}
 }

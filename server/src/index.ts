@@ -1,61 +1,24 @@
-import { Hono } from "hono"
-import { cors } from "hono/cors"
-import { logger } from "hono/logger"
-import { auth } from "./auth"
-import { env } from "./lib/env"
-import { handleError } from "./lib/errors"
-import type { AppVariables } from "./lib/types"
-import { authRoute } from "./routes/auth"
-import { clientsRoute } from "./routes/clients"
-import { dashboardRoute } from "./routes/dashboard"
-import { interventionAssignmentsRoute } from "./routes/intervention-assignments"
-import { interventionNotesRoute } from "./routes/intervention-notes"
-import { interventionsRoute } from "./routes/interventions"
-import { proximityRoute } from "./routes/proximity"
-import { usersRoute } from "./routes/users"
+import { Hono } from "hono";
+import { cors } from "hono/cors";
 
-const app = new Hono<{ Variables: AppVariables }>()
+const app = new Hono();
 
-app.use(
-	"*",
-	cors({
-		origin: env.CORS_ORIGIN,
-		credentials: true,
-		allowHeaders: ["Content-Type", "Authorization"],
-		allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-		exposeHeaders: ["Content-Length"],
-		maxAge: 600,
-	}),
-)
-
-app.use("*", logger())
-
-app.use("*", async (c, next) => {
-	const session = await auth.api.getSession({ headers: c.req.raw.headers })
-	c.set("user", session?.user ?? null)
-	c.set("session", session?.session ?? null)
-	return next()
-})
-
-app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw))
-
-app.get("/api/health", (c) => c.json({ data: { status: "ok" } }))
-
-app.route("/api/auth-custom", authRoute)
-app.route("/api/users", usersRoute)
-app.route("/api/interventions", interventionsRoute)
-app.route("/api/interventions", interventionAssignmentsRoute)
-app.route("/api/interventions", interventionNotesRoute)
-app.route("/api/clients", clientsRoute)
-app.route("/api/dashboard", dashboardRoute)
-app.route("/api/proximity", proximityRoute)
+app.use("*", cors({ origin: process.env.CORS_ORIGIN || "*" }));
 
 app.onError((err, c) => {
-	const { status, body } = handleError(err)
-	return c.json(body, status)
-})
+	console.error(err);
+	return c.json(
+		{
+			error: { code: "INTERNAL_ERROR", message: "Erreur serveur" },
+		},
+		500,
+	);
+});
 
-app.notFound((c) => c.json({ error: { code: "NOT_FOUND", message: "Route introuvable" } }, 404))
+app.get("/api/health", (c) => {
+	return c.json({ data: { status: "ok", message: "Timeo API is running" } });
+});
 
-export default app
-export type AppType = typeof app
+export type AppType = typeof app;
+
+export default app;

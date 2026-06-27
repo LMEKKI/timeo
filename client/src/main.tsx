@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { QueryClientProvider } from "@tanstack/react-query"
 import { RouterProvider, createRouter } from "@tanstack/react-router"
 import { StrictMode } from "react"
@@ -31,10 +32,21 @@ declare module "@tanstack/react-router" {
 const rootElement = document.getElementById("root")
 if (!rootElement) {
 	throw new Error("Root element not found")
+=======
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "./index.css";
+import { App } from "./App.tsx";
+
+const rootElement = document.getElementById("root");
+if (!rootElement) {
+	throw new Error("Root element not found");
+>>>>>>> origin/main
 }
 
 createRoot(rootElement).render(
 	<StrictMode>
+<<<<<<< HEAD
 		<QueryClientProvider client={queryClient}>
 			<AuthProvider>
 				<ThemeProvider>
@@ -44,3 +56,8 @@ createRoot(rootElement).render(
 		</QueryClientProvider>
 	</StrictMode>,
 )
+=======
+		<App />
+	</StrictMode>,
+);
+>>>>>>> origin/main

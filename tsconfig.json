@@ -12,7 +12,7 @@
 		"paths": {
 			"@server/*": ["./server/src/*"],
 			"@client/*": ["./client/src/*"],
-			"@shared/*": ["./shared/dist/*"]
+			"@shared/*": ["./shared/src/*"]
 		},
 
 		// Module resolution
