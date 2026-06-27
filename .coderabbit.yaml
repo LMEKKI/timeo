@@ -7,24 +7,6 @@ reviews:
   auto_review:
     enabled: true
     drafts: false
-
-  # Checkliste de review spécifique au projet
-  checklist:
-    - "Pas de `any` — tout est typé"
-    - "Pas de console.log oublié"
-    - "Pas de code commenté"
-    - "Pas de TODO dans le code (créer une issue)"
-    - "Pas de fichier > 250 lignes"
-    - "Pas de fonction > 30 lignes"
-    - "Nommage clair (pas d'abréviations)"
-    - "Early return (pas de nesting profond)"
-    - "Pas de classe / interface avec 1 impl"
-    - "Named exports uniquement (pas de default export)"
-    - "Erreurs au format canonique `{ error: { code, message, field? } }`"
-    - "Colonnes BDD en anglais"
-    - "UI en français"
-    - "Zod = source de vérité (pas de types manuels)"
-
   # Path-specific instructions
   path_instructions:
     - path: "server/src/routes/**"
@@ -49,19 +31,37 @@ reviews:
         - Zod = source unique de vérité
         - Type inféré: z.infer<typeof schema>
         - Pas de types manuels dupliquant Zod
+    - path: "client/src/lib/realtime-provider.tsx"
+      instructions: |
+        - Polling only via TanStack Query `refetchInterval`. Pas d'EventSource ni de WebSocket.
+    - path: "**/realtime*"
+      instructions: |
+        - Polling only via TanStack Query `refetchInterval`. Pas d'EventSource ni de WebSocket.
+    - path: "client/src/components/shared/map-view.tsx"
+      instructions: |
+        - Map UI = v2. Ne pas implémenter Leaflet en v1.
+    - path: "client/src/routes/tech/map.tsx"
+      instructions: |
+        - Map UI = v2. Ne pas implémenter Leaflet en v1.
+
+# Checklist systématique sur chaque PR
+checklist:
+  - "**Pas d'EventSource ni de WebSocket** — polling only via TanStack Query `refetchInterval`"
+  - "**Pas d'import `leaflet` / `react-leaflet`** — map UI = v2"
+  - "**Pas de champ `image` sur user** — pas d'avatar en v1 (YAGNI)"
+  - "**Pas de champ `endTime` sur interventions** — YAGNI, le status `completed` suffit"
+  - "**Pas de `source` ni `crmId` sur clients** — intégration CRM = v2/v3"
+  - "**Pas de status `en_route`** dans l'enum `interventions.status` (5 statuts, pas 6)"
+  - "**Pas de `default export`** (named exports only) — vérifier qu'aucun `export default` n'est ajouté dans le code"
+  - "**IDs :** tables Better Auth (user, session, account, verification) utilisent `text` (standard Better Auth), tables custom utilisent `uuid`"
 
 # Chat avec le bot
 chat:
-  auto_reply:
-    enabled: true
+  auto_reply: true
 
 # Langue des reviews
 language: fr
 
 # Tone
 tone_instructions: |
-  Tu reviews le code d'un développeur junior en solo.
-  Sois pédagogique : explique POURQUOI quelque chose est mal,
-  pas juste ce qui est mal. Donne des exemples de correction.
-  Encourage les bonnes pratiques quand tu les vois.
-  Sois bienveillant mais direct.
+  Pédagogique et bienveillant (junior solo). Vérifie : pas de any, console.log, TODO, fichier >250 lignes, fonction >30 lignes, classe/interface. Early return, named exports, erreurs format canonique, colonnes anglais, UI français, Zod.

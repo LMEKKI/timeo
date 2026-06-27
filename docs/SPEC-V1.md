@@ -1,6 +1,6 @@
 # Timeo — Spécification v1
 
-> Dernière mise à jour : 2026-06-21
+> Dernière mise à jour : 2026-06-27
 > Statut : Validé — prêt pour le plan d'implémentation
 
 ---
@@ -29,6 +29,8 @@
 - `on_mission`
 - `absent`
 
+**Premier utilisateur (chef) créé via `bun run db:seed`** (Drizzle direct insert). Pas d'endpoint public d'inscription.
+
 **Assignation :** Multi-tech (1 ou plus). Badge "Multi-assigné" visible. Dernier update de status gagne en BDD.
 
 ---
@@ -47,6 +49,7 @@
 **Plugins Better Auth :**
 - `emailAndPassword` — obligatoire pour Better Auth
 - `username` — remplace email comme identifiant de login
+- `admin` — plugin officiel Better Auth, fournit `auth.api.createUser()` server-side avec gestion des rôles (chef/tech) et permissions granulaires
 
 **Imports :**
 ```ts
@@ -59,6 +62,23 @@ import { emailAndPassword, username } from "better-auth/plugins" // tree-shaking
 import { createAuthClient } from "better-auth/react"
 const authClient = createAuthClient({ plugins: [username()] })
 ```
+
+**Plugin admin :**
+```ts
+import { admin } from "better-auth/plugins"
+import { createAccessControl } from "better-auth/plugins/access"
+
+const statement = {
+  user: ["create", "list", "set-role", "set-password"],
+  intervention: ["create", "update", "delete", "read"],
+} as const
+const ac = createAccessControl(statement)
+const chef = ac.newRole({ user: ["create", "list", "set-password"], intervention: ["create", "update", "delete", "read"] })
+const tech = ac.newRole({ intervention: ["read", "update"] })
+// plugins: [admin({ ac, roles: { chef, tech }, defaultRole: "tech", adminRoles: ["chef"] }), username()]
+```
+
+**`mustChangePassword` n'est pas built-in Better Auth.** C'est un additionalField custom (boolean, `input: false`). Le client lit `session.user.mustChangePassword` après login et redirige vers `/changer-mot-de-passe` si true.
 
 **Migration :** Après ajout des plugins → `npx @better-auth/cli@latest migrate`
 
@@ -75,19 +95,20 @@ const authClient = createAuthClient({ plugins: [username()] })
 
 ```
 user
-├── id (uuid, PK)
-├── email (string, unique)
+├── id (text, PK) ← Better Auth standard, NE PAS MODIFIER
+├── email (string, unique, nullable) ← avec plugin username, email devient optionnel
 ├── name (string)
 ├── username (string, unique) ← plugin username
 ├── displayUsername (string) ← plugin username
 ├── emailVerified (boolean)
-├── image (string, nullable)
+├── mustChangePassword (boolean, default: false) ← custom additional field
+├── role (string) ← plugin admin
 ├── createdAt (timestamp)
 └── updatedAt (timestamp)
 
 session
-├── id (uuid, PK)
-├── userId (uuid, FK → user)
+├── id (text, PK) ← Better Auth standard
+├── userId (text, FK → user)
 ├── expiresAt (timestamp)
 ├── token (string)
 ├── ipAddress (string)
@@ -122,8 +143,6 @@ clients
 ├── phone (string)
 ├── email (string, nullable)
 ├── notes (text, nullable)
-├── source (enum: 'internal' | 'crm')
-├── crmId (string, nullable)
 ├── createdAt (timestamp)
 └── updatedAt (timestamp)
 
@@ -145,9 +164,8 @@ interventions
 ├── interlocuteurId (uuid, FK → interlocuteurs, nullable)
 ├── date (date)
 ├── startTime (time)
-├── endTime (time, nullable)
 ├── priority (enum: 'low' | 'high' | 'urgent', nullable)
-├── status (enum: 'unassigned' | 'planned' | 'en_route' | 'started' | 'completed' | 'cancelled')
+├── status (enum: 'unassigned' | 'planned' | 'started' | 'completed' | 'cancelled')
 ├── chefNote (text, nullable)
 ├── deletedAt (timestamp, nullable)
 ├── createdAt (timestamp)
@@ -188,10 +206,11 @@ intervention_notes
 
 - Soft delete sur `clients` et `interventions` (`deletedAt`)
 - Contrainte PK composite sur `intervention_technicien` (anti-doublon)
-- Si `source = 'crm'` → `crmId` obligatoire (validation Zod)
 - Escalade de rôle impossible : API vérifie que seul le chef peut modifier `role`
 - **FK avec arrow functions** : `() => table.column` pour éviter les circular dependencies
 - **Index Drizzle** : `interventions.date` → `.index('idx_interventions_date')`
+
+**IDs :** tables Better Auth (user, session, account, verification) = `text`. Tables custom (addresses, clients, interlocuteurs, interventions, etc.) = `uuid` (PostgreSQL `gen_random_uuid()`).
 
 ---
 
@@ -269,6 +288,8 @@ Toutes les erreurs API suivent ce format unique :
 | PATCH | `/users/:id/status` | 🔴 Chef | Changer dispo tech |
 | GET | `/users/me` | 🟢 Les deux | Mon profil |
 
+**Implémentation** : utilise `auth.api.createUser()` du plugin admin Better Auth, qui gère le hash du mdp + l'assignation de `role` server-side. Le chef passe son cookie de session dans `headers`.
+
 ### Clients
 
 | Méthode | Endpoint | Permission | Description |
@@ -329,9 +350,9 @@ Toutes les erreurs API suivent ce format unique :
 ### Cycle de vie
 
 ```
-unassigned → planned → en_route → started → completed
-                                        ↓
-                                    cancelled (chef only)
+unassigned → planned → started → completed
+                                ↓
+                            cancelled (chef only)
 ```
 
 ### Actions
@@ -340,7 +361,7 @@ unassigned → planned → en_route → started → completed
 |---|---|---|
 | Créer | Chef | N'importe quand |
 | Assigner | Chef | Depuis la liste ou le détail |
-| Démarrer | Tech assigné | Statut = planned ou en_route |
+| Démarrer | Tech assigné | Statut = planned |
 | Clôturer | Tech assigné | Statut = started |
 | Annuler | Chef only | N'importe quand sauf completed |
 
@@ -350,6 +371,7 @@ unassigned → planned → en_route → started → completed
 - Dernier update de status gagne en BDD
 - Pas de confirmation sur démarrer/terminer
 - Confirmation obligatoire sur annuler
+- Le bouton 'Démarrer' part de `planned` et va à `started`. Le statut `en_route` a été retiré en v1 (YAGNI — pas de bouton 'En route' côté tech).
 
 ---
 
@@ -373,7 +395,7 @@ unassigned → planned → en_route → started → completed
 | Charge | Barre par tech : success/#3DD68C (0-2), warning/#F0C000 (3-4), error/#EB5757 (5+) |
 | En attente | Liste des interventions non assignées |
 | Regroupement proximity | Suggestions de groupes par distance (couleurs) |
-| Temps réel | Mise à jour auto via SSE (Server-Sent Events) |
+| Temps réel | Mise à jour auto via **polling** (TanStack Query `refetchInterval` à 10s pour le dashboard) |
 | Recherche rapide | Barre de recherche interventions/clients/techs |
 | Fil d'activité | Dernières actions en temps réel |
 | Stats | Interventions terminées, en cours, en retard, taux complétion |
@@ -383,20 +405,31 @@ unassigned → planned → en_route → started → completed
 4 options étudiées (A: Gantt, B: Colonnes, C: Swim lanes, D: Hybride).
 **Choix : D — Dashboard hybride.** Vue simple : liste de techs avec barres horizontales colorées proportionnelles à la charge. Pas de Gantt interactif en v1 (YAGNI — drag/resize/zoom = complexité inutile pour un dashboard de visibilité).
 
-### Realtime — Approche v1 (KISS)
+### Polling — Approche v1 (KISS)
 
-**SSE (Server-Sent Events)** via Hono, pas Supabase Realtime.
+**Pourquoi le polling plutôt que SSE ?**
+- 10 utilisateurs internes → pas besoin de push sub-seconde
+- SSE via Hono sur Vercel = long-running functions (30-60s timeout) + reconnexion complexe
+- Polling = 0 dépendance externe, marche parfaitement sur Vercel serverless
+- 10 users × 6 req/min × 5 Ko = ~18 MB/h de polling (négligeable)
 
-**Pourquoi SSE plutôt que Supabase Realtime ?**
-- 10 utilisateurs internes → pas besoin de scalabilité Realtime
-- SSE = 20 lignes dans Hono, 0 dépendance externe
-- Supabase Realtime = client Supabase + config WAL/replication = complexité inutile (YAGNI)
-- Si le besoin de scalabilité arrive en v2, migration facile
+**Implémentation :**
+```ts
+useQuery({
+  queryKey: ['dashboard', 'stats'],
+  queryFn: fetchDashboardStats,
+  refetchInterval: 10_000,           // 10s pour le dashboard
+  refetchOnWindowFocus: true,
+  refetchIntervalInBackground: false, // pause quand l'onglet est caché
+})
+```
 
-**Flow :**
-1. DB change → endpoint SSE Hono notifie les clients connectés
-2. Client EventSource → invalidation TanStack Query cache
-3. React re-render automatique
+**Intervalles de polling par contexte :**
+- Dashboard chef : 10s
+- Liste missions tech : 2s
+- Détail intervention : 5s
+
+Si le besoin de push sub-seconde arrive en v2, on pourra migrer vers Supabase Realtime.
 
 ---
 
@@ -417,7 +450,7 @@ unassigned → planned → en_route → started → completed
 
 | Statut | Bouton | Action |
 |---|---|---|
-| Planifié / En route | **Démarrer** | Passe à démarré |
+| Planifié | **Démarrer** | Passe à démarré |
 | Démarré | **Terminer** | Passe à terminé, retour liste |
 
 ### Détail intervention
@@ -450,7 +483,7 @@ Pas de calcul d'itinéraire dans l'app — on ouvre l'app GPS externe.
 - Algorithme simple (pas de TSP)
 - Affichage avec couleurs
 
-**Leaflet :** Carte interactive avec pins colorés par groupe. Disponible pour chef ET tech.
+L'affichage cartographique (Leaflet) est différé en v2. En v1, les groupes sont affichés en liste avec couleurs par groupe.
 
 **API :** `POST /proximity/group` avec les IDs d'interventions → retourne les groupes suggérés.
 
@@ -489,7 +522,6 @@ Pas de calcul d'itinéraire dans l'app — on ouvre l'app GPS externe.
 │ 📋  │                                           │
 │ 👥  │                                           │
 │ 🔧  │                                           │
-│ 🗺️  │                                           │
 │ 👤  │                                           │
 │     │                                           │
 │ 🚪  │                                           │
@@ -508,14 +540,14 @@ Pas de calcul d'itinéraire dans l'app — on ouvre l'app GPS externe.
 │                                     │
 │  [Zone de travail - plein écran]    │
 ├─────────────────────────────────────┤
-│  📋 Missions │  🗺️ Carte  │  👤 Profil │
-│  ███████████ │           │            │
+│  📋 Missions │  👤 Profil            │
+│  ███████████                        │
 └─────────────────────────────────────┘
 ```
 
 - **Pas de header** — contenu plein écran
 - Bottom bar : fond coloré sur l'onglet actif (violet `#5E6AD2`)
-- 3 onglets : Missions (liste) / Carte / Profil
+- 2 onglets : Missions (liste) / Profil
 - Simple, clean, mobile-first
 
 ### Palette spécifique mobile (light mode)
@@ -535,7 +567,6 @@ Pas de calcul d'itinéraire dans l'app — on ouvre l'app GPS externe.
 | Header | Recherche + activité | Aucun |
 | Design system | shadcn | shadcn |
 | Cartes intervention | Même composant | Même composant |
-| Map Leaflet | Dans la sidebar | Onglet bottom bar |
 | Badge multi-assigné | Même badge | Même badge |
 
 ---
@@ -551,7 +582,7 @@ Pas de calcul d'itinéraire dans l'app — on ouvre l'app GPS externe.
 | Action échouée | Toast rouge | "Impossible de créer l'intervention" |
 | Non autorisé | Redirect page erreur | "Vous n'avez pas accès à cette page" |
 | Introuvable | Page 404 custom | "Cette intervention n'existe pas" |
-| Update temps réel | Toast info | "Intervention mise à jour" |
+| Update polling | Toast info | "Intervention mise à jour" |
 
 **Pattern :**
 - Toast via `sonner` (shadcn wrapper) pour les erreurs temporaires et updates temps réel
@@ -572,7 +603,7 @@ Pas de calcul d'itinéraire dans l'app — on ouvre l'app GPS externe.
 | Soumission formulaire | Spinner sur le bouton "Enregistrer" |
 | Action rapide (démarrer/terminer) | Spinner sur le bouton |
 | Recherche | Debounce 300ms + skeleton |
-| Transitions temps réel | Pas de skeleton, mise à jour inline |
+| Transitions optimistes | Pas de skeleton, mise à jour inline |
 
 **Optimistic updates :** Quand le tech clique "Terminer", on met à jour l'UI immédiatement sans attendre la réponse API (meilleure UX).
 
@@ -665,7 +696,7 @@ VITE_API_URL=http://localhost:3000
 | Base de données | Supabase (PostgreSQL) | Gratuit (500 MB) |
 | Auth | Better Auth (sur Vercel) | Gratuit |
 | Géocodage | Google Maps API | Gratuit (28k/mois) |
-| Realtime | SSE (Hono) | Gratuit |
+| Realtime | Polling (TanStack Query) | Gratuit |
 
 ### Structure Vercel
 
@@ -675,12 +706,15 @@ timeo.vercel.app
 └── /* → React SPA (static)
 ```
 
+**BaseURL Better Auth :** ajouter `allowedHosts: ['*.vercel.app']` dans la config Better Auth pour les previews Vercel.
+
 ### Migration DB
 
 - Drizzle Kit pour les migrations
 - `drizzle-kit generate` → `drizzle-kit push` (en dev)
 - `drizzle-kit generate` → migration manuelle (en prod)
 - **Mieux :** `npx @better-auth/cli@latest migrate` pour Better Auth, puis `drizzle-kit generate` pour les tables métier
+- **Seed :** `bun run db:seed` crée le 1er chef (Drizzle direct insert + bcrypt hash)
 
 ### Turborepo — Règles
 
@@ -706,7 +740,7 @@ timeo.vercel.app
 | Runtime | Bun |
 | API | Hono + Hono RPC |
 | ORM | Drizzle |
-| Auth | Better Auth (plugin username) — `better-auth/react` côté client |
+| Auth | Better Auth (plugins `username` + `admin`) — `better-auth/react` côté client |
 | Frontend | React + Vite |
 | UI | shadcn/ui (sonner pour toasts, Skeleton pour loading) |
 | Data fetching | TanStack Query |
@@ -741,14 +775,26 @@ timeo.vercel.app
 
 ### Statuts → Couleurs
 
+Des **statuts d'intervention (5 états)**.
+
 | Statut | Couleur | Code |
 |--------|---------|------|
 | `unassigned` | Gris | `#8A8F98` |
 | `planned` | Violet (primary) | `#5E6AD2` |
-| `en_route` | Violet clair | `#6E79D6` |
 | `started` | Or (warning) | `#F0C000` |
 | `completed` | Émeraude (success) | `#3DD68C` |
 | `cancelled` | Rouge corail (error) | `#EB5757` |
+
+**Mapping enum → label UI :**
+```ts
+const STATUS_LABEL_FR: Record<InterventionStatus, string> = {
+  unassigned: 'Non assigné',
+  planned: 'Planifié',
+  started: 'Démarré',
+  completed: 'Terminé',
+  cancelled: 'Annulé',
+}
+```
 
 ### Composants clés
 - **Sidebar :** 220px → 48px collapsible, fond `#1B1B25`
@@ -775,7 +821,7 @@ timeo.vercel.app
 
 - **Un seul format d'erreur API** — pas de variants selon l'endpoint
 - **Un seul plan de PR** — PR-PLAN.md, pas de découpage en 42 micro-PRs
-- **SSE pour Realtime** — pas de Supabase Realtime pour 10 users
+- **Polling** (TanStack Query `refetchInterval`) — pas besoin de SSE/Supabase Realtime pour 10 users
 - **Timeline simple** — pas de Gantt interactif pour de la visibilité
 - **Colonnes BDD en anglais** — uniforme, pas de mix FR/EN
 
@@ -785,8 +831,8 @@ timeo.vercel.app
 - **Pas de tests unitaires en v1** — test = usage réel (10 users)
 - **Pas de PWA/offline** — connexion terrain suffisante
 - **Pas de Gantt éditable** — visibilité seule, édition = v2 si besoin
-- **Pas de notifications push** — SSE suffit pour 10 users
-- **Pas d'avatar/photo** — `avatarUrl` en BDD mais UI v1 = initiales
+- **Pas de notifications push** — polling suffit pour 10 users
+- **Pas d'avatar/photo** — UI v1 = initiales calculées depuis `name` (champ `image` retiré en v1, YAGNI)
 
 ---
 
@@ -801,3 +847,8 @@ timeo.vercel.app
 - Multi-assignation avec équipe stable
 - Avatar/photo de profil
 - Reset mdp par email
+- **Map UI (Leaflet) — v2** (geocoding + proximity logic restent en v1, affichage carte en v2)
+- **Champ `image` sur user — pas d'avatar en v1**
+- **Champ `endTime` sur interventions — YAGNI, le status `completed` suffit**
+- **Champs `source` + `crmId` sur clients — intégration CRM = v2/v3**
+- **`en_route` status — retiré, le bouton 'Démarrer' part directement de `planned`**

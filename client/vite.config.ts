@@ -1,13 +1,16 @@
-import tailwindcss from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react";
-import path from "path";
-import { defineConfig } from "vite";
+import tailwindcss from "@tailwindcss/vite"
+import { TanStackRouterVite } from "@tanstack/router-plugin/vite"
+import react from "@vitejs/plugin-react"
+import path from "path"
+import { defineConfig } from "vite"
 
 export default defineConfig({
-	plugins: [react(), tailwindcss()],
+	plugins: [TanStackRouterVite({ target: "react" }), react(), tailwindcss()],
 	resolve: {
 		alias: {
 			"@": path.resolve(__dirname, "./src"),
+			"@shared": path.resolve(__dirname, "../shared/src"),
+			"@server": path.resolve(__dirname, "../server/src"),
 		},
 	},
 	server: {
@@ -16,4 +19,4 @@ export default defineConfig({
 			"/api": "http://localhost:3000",
 		},
 	},
-});
+})
