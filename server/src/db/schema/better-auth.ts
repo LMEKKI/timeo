@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import {
 	boolean,
 	index,
@@ -15,14 +14,10 @@ export const availabilityStatusEnum = pgEnum("availability_status", [
 	"on_mission",
 	"absent",
 ]);
-=======
-import { boolean, index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
->>>>>>> origin/main
 
 export const user = pgTable("user", {
 	id: text("id").primaryKey(),
 	name: text("name").notNull(),
-<<<<<<< HEAD
 	email: text("email").unique(),
 	username: text("username").notNull().unique(),
 	displayUsername: text("display_username"),
@@ -32,13 +27,6 @@ export const user = pgTable("user", {
 		.default("available")
 		.notNull(),
 	mustChangePassword: boolean("must_change_password").default(false).notNull(),
-=======
-	email: text("email").notNull().unique(),
-	username: text("username").notNull().unique(),
-	displayUsername: text("display_username"),
-	emailVerified: boolean("email_verified").default(false).notNull(),
-	image: text("image"),
->>>>>>> origin/main
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updatedAt: timestamp("updated_at")
 		.defaultNow()
