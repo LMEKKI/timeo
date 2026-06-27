@@ -477,7 +477,7 @@ Pas de calcul d'itinéraire dans l'app — on ouvre l'app GPS externe.
 
 **Approche v1 :**
 - Les adresses ont `latitude` + `longitude`
-- Google Maps Geocoding API pour obtenir les coordonnées (gratuit 28k/mois)
+- **Photon (Komoot)** pour le géocodage — gratuit, open-source (OpenStreetMap), pas d'API key
 - Calcul de distance entre interventions d'une même date
 - Seuil configurable (défaut: 3 km)
 - Algorithme simple (pas de TSP)
@@ -661,7 +661,7 @@ L'affichage cartographique (Leaflet) est différé en v2. En v1, les groupes son
 | `DATABASE_URL` | URL PostgreSQL Supabase | `postgresql://...` |
 | `BETTER_AUTH_SECRET` | Secret Better Auth | `cle-aleatoire_32+chars` |
 | `BETTER_AUTH_URL` | URL du serveur | `http://localhost:3000` |
-| `GOOGLE_MAPS_API_KEY` | Clé API Geocoding | `AIza...` |
+| ~~`GOOGLE_MAPS_API_KEY`~~ | ~~Retiré en v1.0.1 (migration vers Photon/OSM)~~ | N/A |
 | `CORS_ORIGIN` | Origine autorisée | `http://localhost:5173` |
 | `PORT` | Port du serveur | `3000` |
 
@@ -677,7 +677,6 @@ L'affichage cartographique (Leaflet) est différé en v2. En v1, les groupes son
 DATABASE_URL=postgresql://postgres:password@localhost:5432/timeo
 BETTER_AUTH_SECRET=change-me-32-chars-minimum
 BETTER_AUTH_URL=http://localhost:3000
-GOOGLE_MAPS_API_KEY=your-google-maps-api-key
 CORS_ORIGIN=http://localhost:5173
 PORT=3000
 VITE_API_URL=http://localhost:3000
@@ -695,7 +694,7 @@ VITE_API_URL=http://localhost:3000
 | Frontend (React) | Vercel (static) | Gratuit |
 | Base de données | Supabase (PostgreSQL) | Gratuit (500 MB) |
 | Auth | Better Auth (sur Vercel) | Gratuit |
-| Géocodage | Google Maps API | Gratuit (28k/mois) |
+| Géocodage | Photon (OSM) | Gratuit |
 | Realtime | Polling (TanStack Query) | Gratuit |
 
 ### Structure Vercel
@@ -729,7 +728,7 @@ timeo.vercel.app
 |---|---|---|
 | Vercel | 100 GB bandwidth/mois | ✅ Largement suffisant |
 | Supabase | 500 MB DB, 50k MAU | ✅ Largement suffisant |
-| Google Maps | 28k requests/mois | ✅ ~100/jour max |
+| Photon (OSM) | Pas de limite stricte | ✅ ~100/jour max |
 
 ---
 
@@ -750,7 +749,7 @@ timeo.vercel.app
 | Deploy | Vercel (Hono adapter) |
 | Validation | Zod (source de vérité) |
 | Maps | Leaflet (open source) |
-| Geocoding | Google Maps API |
+| Geocoding | Photon (OSM, open source) |
 
 ---
 

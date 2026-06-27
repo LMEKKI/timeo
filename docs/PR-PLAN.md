@@ -89,7 +89,7 @@
 **KISS/YAGNI :**
 - KISS : `pgEnum` pour status, priority, role, availabilityStatus (vraie contrainte BDD, perf meilleures, beta.2 fix)
 - YAGNI : Pas de `endTime` (status `completed` suffit), pas de `source`/`crmId` (v2), pas de `image` (déjà retiré en PR #2)
-- KISS : Geocoding = 1 appel Google Maps API, pas de cache en v1
+- KISS : Geocoding = 1 appel Photon (OSM) API, pas de cache en v1 (gratuit, pas d'API key)
 - KISS : Proximity = Haversine + seuil de distance (3 km par défaut), pas d'algo TSP
 
 | # | Tâche | Fichiers | Validation |
@@ -107,7 +107,7 @@
 | 11 | Routes interventions CRUD + assign/unassign | `server/src/routes/interventions.ts` | `bun run build:server` |
 | 12 | Route transition (workflow 5 statuts) | `server/src/routes/interventions.ts` | manual test |
 | 13 | Route notes (tech append-only) | `server/src/routes/interventions.ts` | manual test |
-| 14 | Service geocoding (Google Maps Geocoding API) | `server/src/services/geocoding.ts` | `bun run build:server` |
+| 14 | Service geocoding (Photon / OpenStreetMap) | `server/src/services/geocoding.ts` | `bun run build:server` |
 | 15 | Service proximity (Haversine + threshold) | `server/src/services/proximity.ts` | `bun run build:server` |
 | 16 | Route proximity/group | `server/src/routes/proximity.ts` | `bun run build:server` |
 | 17 | Routes dashboard (stats, activity) | `server/src/routes/dashboard.ts` | `bun run build:server` |

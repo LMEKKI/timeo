@@ -1,39 +1,56 @@
-import { AppError } from "../lib/errors";
-import { env } from "../lib/env";
+import { AppError } from "../lib/errors"
+
+const PHOTON_URL = "https://photon.komoot.io/api/"
 
 export type GeocodingResult = {
-	latitude: number;
-	longitude: number;
-	formattedAddress: string;
-};
+	latitude: number
+	longitude: number
+	formattedAddress: string
+}
 
-type GoogleGeocodingResponse = {
-	status: string;
-	results: Array<{
-		formatted_address: string;
-		geometry: { location: { lat: number; lng: number } };
-	}>;
-};
+type PhotonFeature = {
+	geometry: { coordinates: [number, number] }
+	properties: {
+		name?: string
+		street?: string
+		housenumber?: string
+		postcode?: string
+		city?: string
+		country?: string
+	}
+}
+
+type PhotonResponse = {
+	type: "FeatureCollection"
+	features: PhotonFeature[]
+}
 
 export async function geocodeAddress(address: string): Promise<GeocodingResult | null> {
-	const url = new URL("https://maps.googleapis.com/maps/api/geocode/json");
-	url.searchParams.set("address", address);
-	url.searchParams.set("key", env.GOOGLE_MAPS_API_KEY);
+	const url = new URL(PHOTON_URL)
+	url.searchParams.set("q", address)
+	url.searchParams.set("limit", "1")
 
-	const response = await fetch(url.toString());
+	const response = await fetch(url.toString(), {
+		headers: { "User-Agent": "Timeo/1.0 (gestion interventions terrain)" },
+	})
+
 	if (!response.ok) {
-		throw new AppError(502, "INTERNAL_ERROR", "Erreur API Google Geocoding");
+		throw new AppError(502, "INTERNAL_ERROR", "Erreur API Photon")
 	}
 
-	const data = (await response.json()) as GoogleGeocodingResponse;
-	if (data.status !== "OK") return null;
+	const data = (await response.json()) as PhotonResponse
+	const feature = data.features[0]
+	if (!feature) return null
 
-	const first = data.results[0];
-	if (!first) return null;
+	const [longitude, latitude] = feature.geometry.coordinates
+	const p = feature.properties
+	const formattedAddress = [p.housenumber, p.street, p.postcode, p.city, p.country]
+		.filter(Boolean)
+		.join(", ")
 
 	return {
-		latitude: first.geometry.location.lat,
-		longitude: first.geometry.location.lng,
-		formattedAddress: first.formatted_address,
-	};
+		latitude,
+		longitude,
+		formattedAddress: formattedAddress || p.name || address,
+	}
 }

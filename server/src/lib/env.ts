@@ -5,7 +5,6 @@ const envSchema = z.object({
 	BETTER_AUTH_SECRET: z.string().min(32, "BETTER_AUTH_SECRET must be at least 32 characters"),
 	BETTER_AUTH_URL: z.string().url(),
 	CORS_ORIGIN: z.string().url(),
-	GOOGLE_MAPS_API_KEY: z.string().min(1),
 	PORT: z.coerce.number().int().positive().default(3000),
 	NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
 });
