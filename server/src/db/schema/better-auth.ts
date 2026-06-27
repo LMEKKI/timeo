@@ -1,13 +1,32 @@
-import { boolean, index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import {
+	boolean,
+	index,
+	pgEnum,
+	pgTable,
+	text,
+	timestamp,
+} from "drizzle-orm/pg-core";
+
+export const userRoleEnum = pgEnum("user_role", ["chef", "tech"]);
+
+export const availabilityStatusEnum = pgEnum("availability_status", [
+	"available",
+	"on_mission",
+	"absent",
+]);
 
 export const user = pgTable("user", {
 	id: text("id").primaryKey(),
 	name: text("name").notNull(),
-	email: text("email").notNull().unique(),
+	email: text("email").unique(),
 	username: text("username").notNull().unique(),
 	displayUsername: text("display_username"),
 	emailVerified: boolean("email_verified").default(false).notNull(),
-	image: text("image"),
+	role: userRoleEnum("role").default("tech").notNull(),
+	availabilityStatus: availabilityStatusEnum("availability_status_enum")
+		.default("available")
+		.notNull(),
+	mustChangePassword: boolean("must_change_password").default(false).notNull(),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updatedAt: timestamp("updated_at")
 		.defaultNow()
