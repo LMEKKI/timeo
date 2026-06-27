@@ -1,7 +1,6 @@
 # CONTRIBUTING.md — Guide du développeur solo
 
-> Tu es junior, tu codes seul, tu n'as pas de lead dev pour review.
-> Ce guide remplace le lead dev. Suis-le à chaque commit, à chaque PR.
+> Tu es junior, tu codes seul, tu n'as pas de lead dev pour review. Ce guide le remplace. Suis-le à chaque commit, à chaque PR.
 
 ## 1. Avant de coder
 
@@ -13,7 +12,6 @@ git checkout -b feat/phase-X-nom
 
 - 1 branche = 1 phase du plan (`docs/PR-PLAN.md`)
 - Le nom de branche suit `docs/BRANCHING.md` : `feat/`, `fix/`, `hotfix/`, `chore/`, `docs/`
-
 ## 2. Pendant le code — Commits
 
 ### Format (Conventional Commits)
@@ -54,6 +52,7 @@ docs: correction format d'erreur canonique
 ```bash
 # Après chaque tâche terminée qui compile
 bun run lint && bun run type-check && bun run build
+# PR #2 (Auth) mergée ? → bun run db:seed une fois pour créer le 1er chef
 git add -A
 git commit -m "feat: description claire"
 ```
@@ -87,7 +86,6 @@ Ou via l'interface GitHub. Utilise le template automatiquement.
 Tu n'as pas de lead dev. Tu DOIS te reviewer toi-même avant de merger.
 
 ### Checklist self-review
-
 **Avant de regarder le diff :**
 - [ ] Le code fait ce que dit la spec (`docs/SPEC-V1.md`) ?
 - [ ] Je n'ai pas ajouté de feature non prévue (YAGNI) ?
@@ -106,7 +104,6 @@ Tu n'as pas de lead dev. Tu DOIS te reviewer toi-même avant de merger.
 - [ ] Erreurs au format canonique `{ error: { code, message, field? } }`
 - [ ] Colonnes BDD en anglais
 - [ ] UI en français
-
 **Validation finale :**
 - [ ] `bun run lint` passe
 - [ ] `bun run type-check` passe
@@ -138,7 +135,7 @@ git pull origin dev
 git branch -d feat/phase-X-nom
 ```
 
-## 7. Release ( après PR #7 )
+## 7. Release ( après PR #6 )
 
 ```bash
 git checkout main
@@ -173,7 +170,6 @@ git push origin dev
    - Vérifie la checklist Timeo (pas de `any`, fichiers < 250 lignes, etc.)
    - Poste un commentaire avec les issues trouvées
    - Tu peux répondre au bot pour affiner la review
-
 2. **CI GitHub Actions** (`.github/workflows/ci.yml`) tourne :
    - `bun run lint` (Biome)
    - `bun run type-check` (tsc --noEmit)
@@ -193,8 +189,8 @@ git push origin dev
 - `feat/*` push → preview (`timeo-feat-xxx.vercel.app`)
 
 Tu connectes le repo à Vercel une fois (https://vercel.com/new), et c'est tout.
-Le fichier `vercel.json` sera ajouté dans la PR #7 (Realtime + Polish).
-
+Le fichier `vercel.json` sera ajouté dans la **PR #6 (Deploy)**.
+Le temps réel est géré par polling (TanStack Query `refetchInterval`), pas de SSE ni de WebSocket.
 ### Si le CI échoue
 
 1. Lis le message d'erreur dans l'onglet "Actions" sur GitHub
@@ -219,3 +215,5 @@ Le fichier `vercel.json` sera ajouté dans la PR #7 (Realtime + Polish).
 - `docs/CONVENTIONS.md` — Règles de code détaillées
 - `docs/PR-PLAN.md` — Plan d'implémentation
 - `docs/BRANCHING.md` — Stratégie de branches
+- **[`docs/IA-PROMPT-TEMPLATES.md`](./docs/IA-PROMPT-TEMPLATES.md)** — Bibliothèque de 8 templates pour déléguer les tâches à l'agent IA (5min par prompt au lieu de 30)
+- **Better Auth admin plugin** — https://better-auth.com/docs/plugins/admin (utilisé pour la création de techs par le chef)

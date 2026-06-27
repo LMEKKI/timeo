@@ -31,6 +31,29 @@ reviews:
         - Zod = source unique de vérité
         - Type inféré: z.infer<typeof schema>
         - Pas de types manuels dupliquant Zod
+    - path: "client/src/lib/realtime-provider.tsx"
+      instructions: |
+        - Polling only via TanStack Query `refetchInterval`. Pas d'EventSource ni de WebSocket.
+    - path: "**/realtime*"
+      instructions: |
+        - Polling only via TanStack Query `refetchInterval`. Pas d'EventSource ni de WebSocket.
+    - path: "client/src/components/shared/map-view.tsx"
+      instructions: |
+        - Map UI = v2. Ne pas implémenter Leaflet en v1.
+    - path: "client/src/routes/tech/map.tsx"
+      instructions: |
+        - Map UI = v2. Ne pas implémenter Leaflet en v1.
+
+# Checklist systématique sur chaque PR
+checklist:
+  - "**Pas d'EventSource ni de WebSocket** — polling only via TanStack Query `refetchInterval`"
+  - "**Pas d'import `leaflet` / `react-leaflet`** — map UI = v2"
+  - "**Pas de champ `image` sur user** — pas d'avatar en v1 (YAGNI)"
+  - "**Pas de champ `endTime` sur interventions** — YAGNI, le status `completed` suffit"
+  - "**Pas de `source` ni `crmId` sur clients** — intégration CRM = v2/v3"
+  - "**Pas de status `en_route`** dans l'enum `interventions.status` (5 statuts, pas 6)"
+  - "**Pas de `default export`** (named exports only) — vérifier qu'aucun `export default` n'est ajouté dans le code"
+  - "**IDs :** tables Better Auth (user, session, account, verification) utilisent `text` (standard Better Auth), tables custom utilisent `uuid`"
 
 # Chat avec le bot
 chat:
