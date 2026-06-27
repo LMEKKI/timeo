@@ -14,14 +14,14 @@
 		}
 	},
 	"scripts": {
-		"build": "tsc",
-		"dev": "bun --watch run src/index.ts & tsc --watch",
+		"build": "bun --env-file=../.env.local x tsc",
+		"dev": "bun --env-file=../.env.local --watch run src/index.ts",
 		"test": "bun test",
-		"type-check": "tsc --noEmit",
+		"type-check": "bun --env-file=../.env.local x tsc --noEmit",
 		"lint": "biome lint src/",
-		"db:generate": "drizzle-kit generate",
-		"db:push": "drizzle-kit push",
-		"db:seed": "bun run src/db/seed.ts"
+		"db:generate": "bun --env-file=../.env.local x drizzle-kit generate",
+		"db:push": "bun --env-file=../.env.local x drizzle-kit push",
+		"db:seed": "bun --env-file=../.env.local run src/db/seed.ts"
 	},
 	"dependencies": {
 		"@better-auth/drizzle-adapter": "^1.6.19",

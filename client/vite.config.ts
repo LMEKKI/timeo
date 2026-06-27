@@ -6,6 +6,7 @@ import { defineConfig } from "vite"
 
 export default defineConfig({
 	plugins: [TanStackRouterVite({ target: "react" }), react(), tailwindcss()],
+	envDir: "../",
 	resolve: {
 		alias: {
 			"@": path.resolve(__dirname, "./src"),
