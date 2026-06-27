@@ -25,6 +25,9 @@
 		"lint": "turbo lint",
 		"type-check": "turbo type-check",
 		"test": "turbo test",
+		"db:generate": "bun --filter server db:generate",
+		"db:push": "bun --filter server db:push",
+		"db:seed": "bun --filter server db:seed",
 		"postinstall": "turbo build --filter=shared --filter=server",
 		"prepare": "husky"
 	},
