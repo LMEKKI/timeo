@@ -15,24 +15,34 @@ export const availabilityStatusEnum = pgEnum("availability_status", [
 	"absent",
 ]);
 
-export const user = pgTable("user", {
-	id: text("id").primaryKey(),
-	name: text("name").notNull(),
-	email: text("email").unique(),
-	username: text("username").notNull().unique(),
-	displayUsername: text("display_username"),
-	emailVerified: boolean("email_verified").default(false).notNull(),
-	role: userRoleEnum("role").default("tech").notNull(),
-	availabilityStatus: availabilityStatusEnum("availability_status_enum")
-		.default("available")
-		.notNull(),
-	mustChangePassword: boolean("must_change_password").default(false).notNull(),
-	createdAt: timestamp("created_at").defaultNow().notNull(),
-	updatedAt: timestamp("updated_at")
-		.defaultNow()
-		.$onUpdate(() => /* @__PURE__ */ new Date())
-		.notNull(),
-});
+export const user = pgTable(
+	"user",
+	{
+		id: text("id").primaryKey(),
+		name: text("name").notNull(),
+		email: text("email").unique(),
+		username: text("username").unique(),
+		displayUsername: text("display_username"),
+		emailVerified: boolean("email_verified").default(false).notNull(),
+		role: userRoleEnum("role").default("tech").notNull(),
+		availabilityStatus: availabilityStatusEnum("availability_status")
+			.default("available")
+			.notNull(),
+		mustChangePassword: boolean("must_change_password")
+			.default(false)
+			.notNull(),
+		// Better Auth admin plugin fields
+		banned: boolean("banned").default(false).notNull(),
+		banReason: text("ban_reason"),
+		banExpires: timestamp("ban_expires", { withTimezone: true }),
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+		updatedAt: timestamp("updated_at")
+			.defaultNow()
+			.$onUpdate(() => /* @__PURE__ */ new Date())
+			.notNull(),
+	},
+	(table) => [index("user_banned_idx").on(table.banned)],
+);
 
 export const session = pgTable(
 	"session",

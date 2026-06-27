@@ -59,12 +59,15 @@ export function groupByProximity(
 
 		if (cluster.length >= 2) {
 			let totalDistance = 0
-			for (const p of cluster) {
-				for (const q of cluster) {
-					if (q.id !== p.id) totalDistance += haversineDistanceKm(p.coordinates, q.coordinates)
+			for (let i = 0; i < cluster.length; i++) {
+				for (let j = i + 1; j < cluster.length; j++) {
+					const p = cluster[i]
+					const q = cluster[j]
+					if (!p || !q) continue
+					totalDistance += haversineDistanceKm(p.coordinates, q.coordinates)
 				}
 			}
-			const pairs = cluster.length * (cluster.length - 1)
+			const pairs = (cluster.length * (cluster.length - 1)) / 2
 			groups.push({
 				centerId: center.id,
 				interventionIds: cluster.map((p) => p.id),

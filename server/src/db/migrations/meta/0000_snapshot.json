@@ -1,5 +1,5 @@
 {
-  "id": "82c20efc-9e0d-41a7-bb62-e0ff02db38f8",
+  "id": "534f91a3-fca0-4a60-9ef0-56d696ff4004",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -357,7 +357,7 @@
           "name": "username",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "display_username": {
           "name": "display_username",
@@ -380,8 +380,8 @@
           "notNull": true,
           "default": "'tech'"
         },
-        "availability_status_enum": {
-          "name": "availability_status_enum",
+        "availability_status": {
+          "name": "availability_status",
           "type": "availability_status",
           "typeSchema": "public",
           "primaryKey": false,
@@ -394,6 +394,25 @@
           "primaryKey": false,
           "notNull": true,
           "default": false
+        },
+        "banned": {
+          "name": "banned",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "ban_reason": {
+          "name": "ban_reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ban_expires": {
+          "name": "ban_expires",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",
@@ -410,7 +429,23 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "user_banned_idx": {
+          "name": "user_banned_idx",
+          "columns": [
+            {
+              "expression": "banned",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {

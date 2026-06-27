@@ -50,12 +50,15 @@ CREATE TABLE "user" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
 	"email" text,
-	"username" text NOT NULL,
+	"username" text,
 	"display_username" text,
 	"email_verified" boolean DEFAULT false NOT NULL,
 	"role" "user_role" DEFAULT 'tech' NOT NULL,
-	"availability_status_enum" "availability_status" DEFAULT 'available' NOT NULL,
+	"availability_status" "availability_status" DEFAULT 'available' NOT NULL,
 	"must_change_password" boolean DEFAULT false NOT NULL,
+	"banned" boolean DEFAULT false NOT NULL,
+	"ban_reason" text,
+	"ban_expires" timestamp with time zone,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "user_email_unique" UNIQUE("email"),
@@ -148,6 +151,7 @@ ALTER TABLE "intervention_notes" ADD CONSTRAINT "intervention_notes_author_id_us
 CREATE INDEX "idx_addresses_city" ON "addresses" USING btree ("city");--> statement-breakpoint
 CREATE INDEX "account_userId_idx" ON "account" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "session_userId_idx" ON "session" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "user_banned_idx" ON "user" USING btree ("banned");--> statement-breakpoint
 CREATE INDEX "verification_identifier_idx" ON "verification" USING btree ("identifier");--> statement-breakpoint
 CREATE INDEX "idx_clients_name" ON "clients" USING btree ("name");--> statement-breakpoint
 CREATE INDEX "idx_interlocuteurs_client" ON "interlocuteurs" USING btree ("client_id");--> statement-breakpoint
