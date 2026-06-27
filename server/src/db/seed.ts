@@ -20,7 +20,6 @@ async function seed() {
 			email: CHEF_EMAIL,
 			password: CHEF_PASSWORD,
 			name: CHEF_NAME,
-			username: CHEF_USERNAME,
 		},
 	});
 
@@ -30,7 +29,12 @@ async function seed() {
 
 	await db
 		.update(user)
-		.set({ role: "chef", mustChangePassword: true })
+		.set({
+			username: CHEF_USERNAME,
+			displayUsername: CHEF_USERNAME,
+			role: "chef",
+			mustChangePassword: true,
+		})
 		.where(eq(user.id, result.user.id));
 
 	console.log(`✓ Chef créé : ${CHEF_USERNAME} (${CHEF_EMAIL})`);

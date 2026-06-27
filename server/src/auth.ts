@@ -34,6 +34,7 @@ export const auth = betterAuth({
 				required: false,
 				defaultValue: "available",
 				input: false,
+				returned: true,
 			},
 			mustChangePassword: {
 				type: "boolean",
