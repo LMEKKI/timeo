@@ -11,8 +11,10 @@
 Violet Issue est un design system pensé pour les outils de suivi de tickets et de gestion de projet. Timeo l'adopte comme base et l'étend pour :
 - Un **mode dark** (dashboard chef desktop)
 - Un **mode light** dérivé (interface mobile tech en extérieur)
-- Des **statuts d'intervention** (6 états au lieu de 3)
+- Des **statuts d'intervention** (5 états au lieu de 3)
 - Une **sidebar de navigation** type Gemini
+
+**Enums en anglais en BDD/code, labels en français en UI.** Les tokens du code source sont la source unique de vérité.
 
 ---
 
@@ -57,12 +59,23 @@ Violet Issue est un design system pensé pour les outils de suivi de tickets et 
 
 | Statut | Token | Code fond | Code texte |
 |--------|-------|-----------|------------|
-| `non_assigne` | Text Secondary | `#8A8F98` à 15% | `#8A8F98` |
-| `planifie` | Primary | `#5E6AD2` à 22% | `#5E6AD2` |
-| `en_route` | Secondary | `#6E79D6` à 22% | `#A78BFA` |
-| `demarre` | Warning | `#F0C000` à 20% | `#F0C000` |
-| `termine` | Success | `#3DD68C` à 22% | `#3DD68C` |
-| `annule` | Error | `#EB5757` à 22% | `#EB5757` |
+| `unassigned` | Text Secondary | `#8A8F98` à 15% | `#8A8F98` |
+| `planned` | Primary | `#5E6AD2` à 22% | `#5E6AD2` |
+| `started` | Warning | `#F0C000` à 20% | `#F0C000` |
+| `completed` | Success | `#3DD68C` à 22% | `#3DD68C` |
+| `cancelled` | Error | `#EB5757` à 22% | `#EB5757` |
+
+### 4bis. Mapping enum → label UI
+
+```ts
+export const STATUS_LABEL_FR = {
+  unassigned: 'Non assigné',
+  planned: 'Planifié',
+  started: 'Démarré',
+  completed: 'Terminé',
+  cancelled: 'Annulé',
+} as const
+```
 
 ---
 
@@ -74,15 +87,19 @@ Violet Issue est un design system pensé pour les outils de suivi de tickets et 
 | `haute` | High Priority | `#F7953D` à 20% | `#F7953D` |
 | `urgente` | Error | `#EB5757` à 20% | `#EB5757` |
 
+**Labels FR UI :** `low` → 'Basse', `high` → 'Haute', `urgent` → 'Urgente'
+
 ---
 
 ## 6. Disponibilité tech → Couleurs
 
 | Statut | Couleur dot | Code |
 |--------|------------|------|
-| `disponible` | Success | `#3DD68C` |
-| `en_mission` | High Priority | `#F7953D` |
+| `available` | Success | `#3DD68C` |
+| `on_mission` | High Priority | `#F7953D` |
 | `absent` | Error | `#EB5757` |
+
+**Labels FR UI :** `available` → 'Disponible', `on_mission` → 'En mission', `absent` → 'Absent'
 
 ---
 
@@ -262,11 +279,11 @@ Pas de shadows lourdes — utilisation de **layering par couleur de fond**.
 
 ```
 ┌──────────────────────────────────────────────┐
-│ ● Non assigné  ● Planifié  ● En route        │
-│   #8A8F98        #5E6AD2     #6E79D6          │
+│ ● Non assigné  ● Planifié  ● Démarré        │
+│   #8A8F98        #5E6AD2     #F0C000         │
 │                                              │
-│ ● Démarré      ● Terminé   ● Annulé          │
-│   #F0C000        #3DD68C     #EB5757          │
+│ ● Terminé       ● Annulé                    │
+│   #3DD68C        #EB5757                    │
 └──────────────────────────────────────────────┘
 ```
 
@@ -274,13 +291,13 @@ Pas de shadows lourdes — utilisation de **layering par couleur de fond**.
 
 ```
 ┌──────────────────────────────────────────────┐
-│ ● Non assigné  ● Planifié  ● En route        │
-│   fond #F1F3F5   fond #EBF0FF  fond #F0ECFF  │
-│   txt  #6B7280   txt  #5E6AD2  txt  #7C6FD6  │
+│ ● Non assigné  ● Planifié  ● Démarré        │
+│   fond #F1F3F5   fond #EBF0FF  fond #FFF7E6  │
+│   txt  #6B7280   txt  #5E6AD2  txt  #C79500  │
 │                                              │
-│ ● Démarré      ● Terminé   ● Annulé          │
-│   fond #FFF7E6   fond #E6F9F0  fond #FFE6E6  │
-│   txt  #C79500   txt  #2D8A5E  txt  #D14343  │
+│ ● Terminé       ● Annulé                    │
+│   fond #E6F9F0   fond #FFE6E6               │
+│   txt  #2D8A5E   txt  #D14343               │
 └──────────────────────────────────────────────┘
 ```
 

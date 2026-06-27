@@ -83,11 +83,13 @@ git push origin main
 
 ### `main`
 - ✅ Require pull request before merging
-- ✅ Require approvals (1 minimum)
+- ✅ Require approvals (0 minimum — solo dev)
 - ✅ Require status checks to pass (CI: lint, typecheck, build)
 - ✅ Require branches to be up to date
 - ❌ Allow force pushes (non)
 - ❌ Allow deletions (non)
+
+**Note :** le projet est développé par 1 solo dev junior + 1 agent IA (co-pilote). 0 approval requis, la CI (lint + type-check + build) suffit. Le pre-push Husky bloque les push directs sur main/dev.
 
 ### `dev`
 - ✅ Require pull request before merging
