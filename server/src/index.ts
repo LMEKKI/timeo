@@ -68,3 +68,11 @@ app.notFound((c) =>
 export type AppType = typeof app
 
 export { app }
+
+if (typeof Bun !== "undefined") {
+	Bun.serve({
+		port: env.PORT,
+		fetch: app.fetch,
+	})
+	console.log(`🚀 Timeo API ready on http://localhost:${env.PORT}`)
+}
